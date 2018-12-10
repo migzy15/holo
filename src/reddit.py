@@ -1,5 +1,7 @@
 from logging import debug, info, error, exception
 import praw
+import re
+import configparser
 
 # Initialization
 
@@ -33,7 +35,7 @@ def submit_text_post(subreddit, title, body):
 	try:
 		info("Submitting post to {}".format(subreddit))
 		new_post = _r.subreddit(subreddit).submit(title, selftext=body, send_replies=False)
-                advertise_with_sticky(new_post, body)
+		advertise_with_sticky(new_post, body)
 		return new_post
 	except:
 		exception("Failed to submit text post")
@@ -64,19 +66,18 @@ def get_shortlink_from_id(id):
 	return "http://redd.it/{}".format(id)
 
 def advertise_with_sticky(post, body):
-    poll_ptrn = r"https://youpoll.me/\d+"
-    poll_link = re.search(poll_ptrn, body).group()
-
-    c = configparser.ConfigParser()
-    c.read('mod_config.ini')
-    mod_acc = praw.Reddit(**c['Auth'])
-    reply_to = mod_acc.submission(id=post.id)
-
-    reply_text = """
+	poll_ptrn = r"https://youpoll.me/\d+"
+	poll_link = re.search(poll_ptrn, body).group()
+	
+	c = configparser.ConfigParser()
+	c.read('mod_config.ini')
+	mod_acc = praw.Reddit(**c['Auth'])
+	reply_to = mod_acc.submission(id=post.id)
+	
+	reply_text = """
 Hello /r/anime ! Did you know all episode discussion posts include a rating poll ? Just open the post above, you'll see the link plain as day. Go there and give us your opinion on this episode !
-
-... feeling lazy ? Just this once, I'll give you the link here as well. [Click here to go to the poll.]({poll_link}) I hope you enjoyed the episode !
-"""
-
-    reply = reply_to.reply(reply_text)
-    reply.mod.distinguish(sticky=True)
+	
+Feeling lazy ? Just this once, I'll give you the link. [Click here to go to the poll.]({poll_link}) Hope you enjoyed the episode !""".format(poll_link=poll_link)
+	
+	reply = reply_to.reply(reply_text)
+	reply.mod.distinguish(sticky=True)
