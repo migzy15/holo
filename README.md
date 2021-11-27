@@ -1,3 +1,5 @@
+Hi! I just want the minimum points for the final project because my other classes are way too hard right now. 
+
 ![Holo, of course.](holo.png)
 
 # Holo
